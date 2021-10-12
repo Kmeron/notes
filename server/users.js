@@ -1,35 +1,39 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jwt-simple')
 
-const { connection, initDatabase } = require('./db.js')
+const { sequelize, User } = require('./db.js')
 const ServiceError = require('./ServiceError.js')
 const {jwtSecret} = require('./config.js')
 
 const saltRounds = 10
 
 function createUser(newUser) {
-    return connection.beginTransaction()
-        .then(() => connection.query('SELECT login FROM users WHERE login=?', newUser.login))
-        .then(([data]) => {
-            if (data.length) {
-                connection.rollback()
-                throw new ServiceError({
-                    message: 'User with such login already exists',
-                    code: 'INVALID_LOGIN'
-                })
-            }
-            return bcrypt.hash(newUser.password, saltRounds)
-                
-        })
-        .then((hash) => {
-            const values = [newUser.login, hash]
-            return connection.query('INSERT INTO users(login, password) VALUES(?, ?)', values)
-        })
-        .then(([result]) => connection.query('SELECT login FROM users WHERE id=?', result.insertId))
-        .then(([[loginInfo]]) => {
-            return connection.commit().then(()=> dumpLogin(loginInfo))
-        })
+    return sequalize.transaction
 }
+
+// function createUser(newUser) {
+//     return connection.beginTransaction()
+//         .then(() => connection.query('SELECT login FROM users WHERE login=?', newUser.login))
+//         .then(([data]) => {
+//             if (data.length) {
+//                 connection.rollback()
+//                 throw new ServiceError({
+//                     message: 'User with such login already exists',
+//                     code: 'INVALID_LOGIN'
+//                 })
+//             }
+//             return bcrypt.hash(newUser.password, saltRounds)
+                
+//         })
+//         .then((hash) => {
+//             const values = [newUser.login, hash]
+//             return connection.query('INSERT INTO users(login, password) VALUES(?, ?)', values)
+//         })
+//         .then(([result]) => connection.query('SELECT login FROM users WHERE id=?', result.insertId))
+//         .then(([[loginInfo]]) => {
+//             return connection.commit().then(()=> dumpLogin(loginInfo))
+//         })
+// }
 
 function dumpLogin(dbLogin) {
     return {login: dbLogin.login}
