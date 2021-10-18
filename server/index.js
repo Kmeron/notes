@@ -49,7 +49,6 @@ app
     })
     .post('/registration', (req,res) => {
         const newUser = {...req.body}
-        console.log(newUser);
         responseToClient(res, createUser(newUser))
     })
     .post('/authorization', (req,res) => {
@@ -57,7 +56,7 @@ app
         responseToClient(res, authUser(user))
     })
 
-sequelize.sync({force: true})
+sequelize.sync()
     .then(() => app.listen(3000, () => console.log('App listen on port 3000')))
     .catch(console.log)
 

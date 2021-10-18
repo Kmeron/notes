@@ -14,14 +14,17 @@ const User = sequelize.define('user', {
       allowNull: false
     },
     password: {
-      type: DT.STRING(30),
+      type: DT.STRING(60),
       allowNull: false
     }
   })
 
   function initRelations () {
     // const User = sequelize.model('user')
-    User.hasMany(Note, { onDelete: 'cascade'})
+    User.hasMany(Note, { 
+      foreignKey: 'userId',
+      onDelete: 'cascade'
+    })
   }
 
   module.exports = {User, initRelations}

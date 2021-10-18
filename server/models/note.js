@@ -11,13 +11,17 @@ const Note = sequelize.define('note', {
     },
     text: {
       type: DT.STRING
+    },
+    userId: {
+      type: DT.INTEGER,
+      allowNull: false
     }
   })
 
-  // function initRelation () {
-  //   Note.belongsTo('user', {
+  function initRelation () {
+    Note.belongsTo(User, {
+      foreignKey: 'userId'
+    })
+  }
 
-  //   })
-  // }
-
-module.exports = {Note, }
+module.exports = {Note, initRelation}
