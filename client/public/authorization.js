@@ -2,6 +2,7 @@ import {requestToServer} from './utils.js'
 const login = document.getElementById('login')
 const password = document.getElementById('password')
 const signIn = document.getElementById('sign-in')
+const signUp = document.getElementById('sign-up')
 
 signIn.onclick = () => {
     const payload = {
@@ -20,4 +21,8 @@ signIn.onclick = () => {
         window.location.href = '/'
     })
     .catch(error => alert(error.message))
+}
+
+signUp.onclick = () => {
+    window.location.href = '/registration'
 }

@@ -1,101 +1,165 @@
-const { connection } = require('./db.js')
+const { sequelize } = require('./db.js')
+const {User} = require('./models/user.js')
+const {Note} = require('./models/note.js')
 const ServiceError = require('./ServiceError')
+const { Op } = require('sequelize')
 
-function getNotes(params = {}) { 
-  const queryArguments = params.search
-    ? ['SELECT * FROM notes WHERE title LIKE ? OR text LIKE ? AND userId=? ORDER BY ID DESC LIMIT ? OFFSET ?', [`%${params.search}%`, `%${params.search}%`, params.userId, +params.limit, +params.offset]]
-    : ['SELECT * FROM notes WHERE userId=? ORDER BY id DESC LIMIT ? OFFSET ?', [params.userId, +params.limit, +params.offset]]
-  return connection.beginTransaction()
-    .then(() => connection.query(...queryArguments))
-    .then(([selectResult]) =>  {
-      const countArguments = params.search
-      ? ['SELECT COUNT(*) FROM notes WHERE title LIKE ? OR text LIKE ? AND userId=?', [`%${params.search}%`, `%${params.search}%`, params.userId]]
-      : ['SELECT COUNT(*) FROM notes WHERE userId=?', params.userId]
-      return connection.query(...countArguments)
-      .then(([[countResult]]) => ({selectResult, countResult}))
-    })
-    .then(({selectResult, countResult}) => {
-      const data = selectResult.map(note => dumpNote(note))
-      const meta = { limit: +params.limit, offset: +params.offset, totalCount: countResult['COUNT(*)'] }
-      return connection.commit().then(() => {
-        return { data, meta }
-      })
-    })
-    .catch(error => {
-      connection.rollback()
-      console.log(error);
-      if (['ER_PARSE_ERROR', 'ER_SP_UNDECLARED_VAR'].includes(error.code)) {
-        throw new ServiceError({
-          message: 'Provided invalid data for getting note',
-          code: 'INVALID_DATA'
+function getNotes(params = {}) {
+  return sequelize.transaction()
+    .then((transaction) => {
+      return Note.findAll(chooseSelectArgument(params), {transaction})
+        .then(selectResult => {
+          return Note.count(chooseCountArgument(params), {transaction})
+          .then(countResult => ({selectResult, countResult}))
         })
-      }
-      throw error
+        .then(result => {
+          const data = result.selectResult.map(element => dumpNote(element.dataValues))
+          const meta = {limit: +params.limit, offset: +params.offset, totalCount: result.countResult}
+          return transaction.commit().then(() => ({data, meta}))
+        })
+        .catch(error => {
+          return transaction.rollback()
+            .then(() => {
+              if (['ER_PARSE_ERROR', 'ER_SP_UNDECLARED_VAR'].includes(error.code)) {
+                throw new ServiceError({
+                  message: 'Provided invalid data for getting note',
+                  code: 'INVALID_DATA'
+                })
+              }
+              throw error
+            })
+        })
     })
-
 }
 
-function postNewNote(note) {
-  const insertData = [note.title, note.text, note.userId]
-  return connection.beginTransaction()
-    .then(() => connection.query('INSERT INTO notes(title, text, userId) VALUES(?, ?, ?)', insertData))
-    .then(([data]) =>  {
-      const selectData = [data.insertId, note.userId]
-      return connection.query('SELECT * FROM notes WHERE id=? AND userId=?', selectData)
+function chooseSelectArgument(params) {
+  const query = {
+    where: {
+     userId: params.userId,
+    },
+    order: [['id', 'DESC']],
+    limit: +params.limit,
+    offset: +params.offset,
+  }
+
+  if (params.search) {
+    query.where[Op.or] = [
+      {title: {[Op.substring]: params.search}}, 
+      {text: {[Op.substring]: params.search}}
+    ]
+  }
+  
+  return query
+}
+
+function chooseCountArgument(params) {
+  const arg = {
+    where: {
+      userId: params.userId,
+    }
+  }
+
+  if (params.search) {
+    arg.where[Op.or] = [
+      {title: {[Op.like]: params.search}}, 
+      {text: {[Op.like]: params.search}}
+    ]
+  }
+
+  return arg
+}
+
+function postNewNote({title, text, userId}) {
+  return sequelize.transaction()
+    .then((transaction) => {
+      return Note.create({
+        title,
+        text,
+        userId
+      }, {transaction})
+        .then((note) => {
+          return transaction.commit()
+            .then(() => {
+              return dumpNote(note)
+            })
+        })
+        .catch(error => {
+          return transaction.rollback()
+            .then(() => {
+              if (error.code === 'ER_PARSE_ERROR') throw new ServiceError({
+                message: 'Provided invalid data for creating note',
+                code: 'INVALID_DATA'
+              })
+              throw error
+            })
+        })
     })
-    .then(([data]) => {
-      return connection.commit().then(() => dumpNote(data[0]))
-    })
-    .catch(error => {
-      connection.rollback()
-      console.log(error)
-      if (error.code === 'ER_PARSE_ERROR') throw new ServiceError({
-        message: 'Provided invalid data for creating note',
-        code: 'INVALID_DATA'
+}
+
+function deleteNoteById({id, userId}) {
+  return sequelize.transaction()
+    .then((transaction) => {
+      return Note.destroy({
+        where: {
+          id,
+          userId
+        }, 
+      }, {transaction})
+      .then(result => {
+        if (!result) {
+          return transaction.rollback()
+            .then(() => {
+              throw new ServiceError({
+                message: 'Provided non-existent note id',
+                code: 'INVALID_NOTE_ID'
+              }) 
+            })
+        }
+        return transaction.commit()
+          .then(() => {})
       })
-      throw error
     })
 }
 
-function deleteNoteById(payload) {
-  const delInfo = [payload.id, payload.userId]
-  return connection.beginTransaction()
-    .then(() => connection.query('DELETE FROM notes WHERE id=? AND userId=?', delInfo))
-    .then(([result]) => {
-      if (result.affectedRows === 0) {
-        connection.rollback()
-        throw new ServiceError({
-          message: 'Provided non-existent note id',
-          code: 'INVALID_NOTE_ID'
-        }) 
-      }
-      return connection.commit()
-    })
-}
-
-function editNoteById(payload) {
-  const updateInfo = [payload.title, payload.text, payload.id, payload.userId]
-  return connection.beginTransaction()
-    .then(() => connection.query('UPDATE notes SET title=?, text=? WHERE id=? AND userId=?', updateInfo))
-    .then(() => {
-      const selectInfo = [payload.id, payload.userId]
-      return connection.query('SELECT * FROM notes WHERE id=? AND userId=?', selectInfo)
-    })
-    .then(([note]) => {
-      return connection.commit().then(() => dumpNote(note[0]))
-    })
-    .catch(error => {
-      connection.rollback()
-      console.log(error)
-      if (error.code === 'ER_PARSE_ERROR') throw new ServiceError({
-        message: 'Provided invalid data for editing note',
-        code: 'INVALID_DATA'
-      })
-      throw error
+function editNoteById({title, text, id, userId}) {
+  return sequelize.transaction()
+    .then((transaction) => {
+      return Note.update({
+        title,
+        text
+      }, {
+        where: {
+          id,
+          userId
+        }
+      }, {transaction})
+        .then(() => {
+          return Note.findOne({
+            where: {
+              id,
+              userId
+            }
+          }, {transaction})
+        })
+        .then(note => {
+          return transaction.commit()
+            .then(() => dumpNote(note))
+        })
+        .catch(error => {
+          return transaction.rollback()
+            .then(() => {
+              if (error.code === 'ER_PARSE_ERROR') throw new ServiceError({
+                message: 'Provided invalid data for editing note',
+                code: 'INVALID_DATA'
+              })
+              throw error
+            })
+        })
     })
 }
 
 function dumpNote(note) {
+  console.log(note);
   return {
     id: note.id,
     title: note.title,
@@ -103,18 +167,25 @@ function dumpNote(note) {
   }
 }
 
-function deleteAllNotes(payload) {
-  const userId = payload.userId
-  
-  return connection.beginTransaction()
-    .then(() => connection.query('DELETE FROM notes WHERE userId=?', userId))
-    .then(() => connection.commit())
-    .then(() => {})
-    .catch(error => {
-      connection.rollback()
-      throw error
+function deleteAllNotes({userId}) {
+  return sequelize.transaction()
+    .then((transaction) => {
+      return Note.destroy({
+        where: {
+          userId
+        }
+      }, {transaction})
+      .then(() => {
+        return transaction.commit()
+          .then(() => {})
+      })
+      .catch(error => {
+        return transaction.rollback()
+          .then(() => {
+            throw error
+          })
+      })
     })
 }
-
 
 module.exports = { postNewNote, getNotes, deleteNoteById, editNoteById, deleteAllNotes, }

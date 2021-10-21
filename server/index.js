@@ -1,7 +1,7 @@
 const path = require('path')
 const express = require('express')
 const {postNewNote, deleteAllNotes, getNotes, deleteNoteById, editNoteById,} = require('./notes')
-const {initDatabase} = require('./db.js')
+const {sequelize} = require('./sequelize.js')
 const {createUser, authUser} = require('./users.js')
 const ServiceError = require('./ServiceError')
 const {checkSession} = require('./middlewares')
@@ -56,7 +56,7 @@ app
         responseToClient(res, authUser(user))
     })
 
-initDatabase()
+sequelize.sync()
     .then(() => app.listen(3000, () => console.log('App listen on port 3000')))
     .catch(console.log)
 

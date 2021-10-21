@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Display&display=swap');
+
+body {
+    height: 100vh;
+    background-color: #deefed;
+    color: #0f141e;
+    font-size: 16px;
+    font-weight: normal;
+    font-family: 'Noto Sans Display', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+button {
+    width: fit-content;
+    background-color: #fbfcfd;
+    text-align: center;
+    color: black;
+    font-size: 16px;
+    font-family: 'Noto Sans Display', sans-serif;
+    border-radius: 16px;
+    border: 2px solid #fbfcfd;
+    transition-duration: 0.2s;
+    margin: 16px;    
+}
+
+button:hover {
+    border: 2px solid #93a7a6;
+    background-color: #fbfcfd;
+    color: black;
+}
+button:focus {
+    outline: none;
+}
+
+.input-line input {
+    margin-left:2rem;
+    border-radius: 16px;
+    border: 2px solid #93a7a6;
+    background-color: #fbfcfd;
+}
+.input-line input:focus {
+    border: 2px solid #e0e5e6;
+    background-color: #fbfcfd;
+    outline: 2px solid transparent;
+}
+
+#auth-block {
+    vertical-align: middle;
+    box-shadow: 0px 0px 16px 10px rgba(147, 167, 166, 0.41);
+    height: max-content;
+    background-color: #bec9ca;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    margin: 3rem;
+    border: 3px solid #e0e5e6 ;
+    border-radius: 16px;
+}
+.input-line {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+#auth-div {
+    display: flex;
+    justify-content: center;
+
+}
+#auth {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    color: black;
+    background-color: #fbfcfd;
+    border-radius: 16px;
+
+    padding: 5px 5px;
+}
+
+#acc {
+    display: flex;
+    justify-content: center;
+
+}

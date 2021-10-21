@@ -1,9 +1,6 @@
 import { requestToServer } from "./utils.js"
 
-if (!localStorage.getItem('jwt')) {
-    alert('Go fucking authorize!')
-    location.href = '/authorization'
-}
+const signOut = document.getElementById('sign-out')
 
 const searchArea = document.getElementById('search')
 
@@ -23,6 +20,8 @@ const pageButtonsArea = document.getElementById('page-buttons-area')
 
 let pagination = {step: 10, page: 1}
 
+initialization()
+
 function getPagination () {
     const {step, page} = pagination
     return {
@@ -30,9 +29,6 @@ function getPagination () {
         offset: page * step - step
     }
 }
-
-getNotes(getPagination())
-.then(({meta})=> createPageButtons(meta))
 
 create.onclick = function() {
    
@@ -202,7 +198,7 @@ find.onclick = function() {
     getNotes({search, ...searchMeta})  
     .then(data=> {
         createPageButtons(data.meta)
-        return data\
+        return data
     })
 }
 
@@ -243,3 +239,17 @@ function setDisabledPageButton() {
     pageButtons[pagination.page-1].disabled = true
 }
 
+signOut.onclick = () => {
+    localStorage.removeItem('jwt')
+    location.href = '/authorization'
+}
+
+function initialization() {
+    if (!localStorage.getItem('jwt')) {
+        alert('Dear user, get authorized first!')
+        location.href = '/authorization'
+    } else {
+        getNotes(getPagination())
+            .then(({meta})=> createPageButtons(meta))
+    }
+}
