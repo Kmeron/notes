@@ -20,10 +20,7 @@ const pageButtonsArea = document.getElementById('page-buttons-area')
 
 let pagination = {step: 10, page: 1}
 
-getNotes(getPagination())
-            .then(({meta})=> createPageButtons(meta))
-
-// initialization()
+initialization()
 
 function getPagination () {
     const {step, page} = pagination

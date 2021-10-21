@@ -6,14 +6,13 @@ function checkSession (req, res, next) {
         const {userId} = jwt.decode(req.headers.authorization, jwtSecret)
         if(!userId) throw new Error()
         res.locals.userId = userId
+        next()
     } catch {
         res.send({
             ok: false,
             error: {message: 'User undefined', code: 'AUTHORIZATION_ERROR'}
         })
     }
-
-    next()
 }
 
 module.exports = {
