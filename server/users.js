@@ -5,6 +5,7 @@ const {sequelize} = require('./db.js')
 const { User } = require('./models/user.js')
 const ServiceError = require('./ServiceError.js')
 const {jwtSecret} = require('./config.js')
+const {transportSendMail} = require('./mail')
 
 const saltRounds = 10
 
@@ -18,24 +19,73 @@ function createUser(newUser) {
             }, {transaction})
             .then((data) => {
                 if (data.length) {
-                    return transaction.rollback()
-                        .then(() => {
-                            throw new ServiceError ({
-                                message: 'User with such login already exists',
-                                code: 'INVALID_LOGIN'
-                            })
-                        })
+                    throw new ServiceError ({
+                        message: 'User with such login already exists',
+                        code: 'INVALID_LOGIN'
+                    })
                 }
                 return bcrypt.hash(newUser.password, saltRounds)
             })
             .then(function (hash) {
                 return User.create({
                     login: newUser.login,
-                    password: hash
+                    password: hash,
+                    status: 'PENDING'
                 }, {transaction})
             })
-            .then((data) => {
-                return transaction.commit().then(() => ({login: data.login}))
+            .then((user) => {
+                const token = jwt.encode({userId: user.id}, jwtSecret)
+                return transportSendMail({
+                    from: 'lkmeronl@gmail.com',
+                    to: newUser.login,
+                    subject: 'Email verification',
+                    text: `Hello, to confirm the verification click: http://localhost:3000/authentication?token=${token}`
+                })
+                .then(() => {
+                    return transaction.commit().then(() => ({login: user.login}))
+                })
+            })
+            .catch(error => {
+                return transaction.rollback()
+                    .then(() => { 
+                    throw error
+                })
+            })
+        })
+}
+
+function verifyUser({userId}) {
+    return sequelize.transaction()
+        .then((transaction) => {
+            return User.findOne({
+                where: {
+                    id: userId,
+                }
+            }, {transaction})
+            .then(user => {
+                return User.update({
+                    status: 'ACTIVE',
+                },
+                {
+                    where: {
+                        id: user.id
+                    }
+                }, {transaction})
+            })
+            .then(([result]) => {
+                if(!result) {
+                    throw new ServiceError({
+                        message: 'User has been verified already',
+                        code: 'VERIFICATION_ERROR'
+                    })
+                }
+                return transaction.commit()
+            })
+            .catch(error => {
+                return transaction.rollback()
+                    .then(() => {
+                        throw error
+                    })
             })
         })
 }
@@ -49,12 +99,22 @@ function authUser({login, password}) {
                 }
             }, {transaction})
             .then(([user]) => {
+                console.log(user)
                 if (!user) {
                     return transaction.rollback()
                         .then(() => {
                             throw new ServiceError({
                                 message: 'User with such login does not exist',
                                 code: 'INVALID_LOGIN'
+                            })
+                        })
+                }
+                if (user.status === 'PENDING') {
+                    return transaction.rollback()
+                        .then(() => {
+                            throw new ServiceError({
+                                message: 'Please verify your email',
+                                code: 'VERIFICATION ERROR'
                             })
                         })
                 }
@@ -79,4 +139,4 @@ function authUser({login, password}) {
         })
 }
 
-module.exports = { createUser, authUser }
+module.exports = { createUser, authUser, verifyUser }
