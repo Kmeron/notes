@@ -15,8 +15,12 @@ signUp.onclick = () => {
         body: JSON.stringify(payload)
     })
     .then(() => {
-        alert('You have been registered!')
+        alert('Congratulations! You have just registered. Please check your email to verify account!')
         window.location.href = '/authorization'
     })
-    .catch(error => alert(error.message))
+    .catch(error => {
+        alert(error.message)
+        login.value = ''
+        password.value = ''
+    })
 }

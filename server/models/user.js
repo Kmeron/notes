@@ -16,6 +16,10 @@ const User = sequelize.define('user', {
     password: {
       type: DT.STRING(60),
       allowNull: false
+    },
+    status: {
+      type: DT.STRING(10),
+      allowNull: false
     }
   })
 

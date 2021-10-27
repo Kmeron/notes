@@ -3,14 +3,15 @@ const {jwtSecret} = require('./config.js')
 
 function checkSession (req, res, next) {
     try {
-        const {userId} = jwt.decode(req.headers.authorization, jwtSecret)
+        const authUser = req.headers.authorization || req.query.token
+        const {userId} = jwt.decode(authUser, jwtSecret)
         if(!userId) throw new Error()
         res.locals.userId = userId
         next()
     } catch {
         res.send({
             ok: false,
-            error: {message: 'User undefined', code: 'AUTHORIZATION_ERROR'}
+            error: {message: 'User undefined', code: 'VERIFICATION_ERROR'}
         })
     }
 }
