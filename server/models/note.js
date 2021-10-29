@@ -1,3 +1,4 @@
+const { text } = require('express')
 const {sequelize, DT} = require('../db.js')
 
 const Note = sequelize.define('note', {
@@ -16,6 +17,12 @@ const Note = sequelize.define('note', {
       type: DT.INTEGER,
       allowNull: false
     }
+  }, {
+    indexes: [
+      {type: 'FULLTEXT',
+      name: 'Notes_title_text_index',
+      fields: ['title', 'text']}
+    ]
   })
 
   function initRelation () {

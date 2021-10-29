@@ -36,7 +36,7 @@ function createUser(newUser) {
             .then((user) => {
                 const token = jwt.encode({userId: user.id}, jwtSecret)
                 return transportSendMail({
-                    from: 'lkmeronl@gmail.com',
+                    from: 'thonykh21@gmail.com',
                     to: newUser.login,
                     subject: 'Email verification',
                     text: `Hello, to confirm the verification click: http://localhost:3000/authentication?token=${token}`

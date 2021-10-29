@@ -4,8 +4,8 @@ const {promisify} = require('util')
 
 const auth = {
     auth: {
-        api_key: '6df448f4d9b3866f78efa917df04a24f-2bf328a5-5b542320',
-        domain: 'sandbox7f3a7199375c4f44a2b5bb2458826114.mailgun.org'
+        api_key: '1e4366367da95f4fa7745301925f6a11-20ebde82-35179680',
+        domain: 'sandbox66e5fa4b3cb8425f9f038fed1d0ccd22.mailgun.org'
     }
 }
 
