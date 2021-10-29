@@ -7,9 +7,9 @@ const { Op } = require('sequelize')
 function getNotes(params = {}) {
   return sequelize.transaction()
     .then((transaction) => {
-      return Note.findAll(chooseSelectArgument(params), {transaction})
+      return Note.findAll(chooseArgument(params), {transaction})
         .then(selectResult => {
-          return Note.count(chooseCountArgument(params), {transaction})
+          return Note.count(chooseArgument(params), {transaction})
           .then(countResult => ({selectResult, countResult}))
         })
         .then(result => {
@@ -32,42 +32,23 @@ function getNotes(params = {}) {
     })
 }
 
-function chooseSelectArgument(params) {
+
+function chooseArgument(params) {
   const query = {
-    where: {
-     userId: params.userId,
-    },
+    where: [
+     {userId: params.userId},
+    ],
     order: [['id', 'DESC']],
     limit: +params.limit,
     offset: +params.offset,
   }
 
   if (params.search) {
-    query.where[Op.or] = [
-      {title: {[Op.substring]: params.search}}, 
-      {text: {[Op.substring]: params.search}}
-    ]
+  query.where.push(sequelize.literal(`MATCH (title,text) AGAINST ('(${params.search}*) ("${params.search}")' IN BOOLEAN MODE)`)) // Sql injection
   }
-  
   return query
 }
 
-function chooseCountArgument(params) {
-  const arg = {
-    where: {
-      userId: params.userId,
-    }
-  }
-
-  if (params.search) {
-    arg.where[Op.or] = [
-      {title: {[Op.like]: params.search}}, 
-      {text: {[Op.like]: params.search}}
-    ]
-  }
-
-  return arg
-}
 
 function postNewNote({title, text, userId}) {
   return sequelize.transaction()

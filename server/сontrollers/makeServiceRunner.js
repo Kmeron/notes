@@ -1,3 +1,4 @@
+const ServiceError = require('../ServiceError')
 
 function responseToClient(res, promise) {
     promise
