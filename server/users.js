@@ -10,6 +10,7 @@ const {transportSendMail} = require('./mail')
 const saltRounds = 10
 
 function createUser(newUser) {
+    console.log(newUser);
     return sequelize.transaction()
         .then(function (transaction) {
             return User.findAll({
@@ -18,6 +19,7 @@ function createUser(newUser) {
                 },
             }, {transaction})
             .then((data) => {
+                console.log(data);
                 if (data.length) {
                     throw new ServiceError ({
                         message: 'User with such login already exists',
@@ -27,6 +29,7 @@ function createUser(newUser) {
                 return bcrypt.hash(newUser.password, saltRounds)
             })
             .then(function (hash) {
+                console.log(hash);
                 return User.create({
                     login: newUser.login,
                     password: hash,
@@ -34,6 +37,7 @@ function createUser(newUser) {
                 }, {transaction})
             })
             .then((user) => {
+                console.log(user);
                 const token = jwt.encode({userId: user.id}, jwtSecret)
                 return transportSendMail({
                     from: 'thonykh21@gmail.com',
@@ -46,6 +50,7 @@ function createUser(newUser) {
                 })
             })
             .catch(error => {
+                console.log(error);
                 return transaction.rollback()
                     .then(() => { 
                     throw error

@@ -5,7 +5,7 @@ export function requestToServer(route, options) {
         ...options.headers,
         'Authorization' : jwt
     }
-    return fetch(route, options)
+    return fetch('/api/v1' + route, options)
         .then(response => response.json())
         .then(body => {
             if (body.ok){
