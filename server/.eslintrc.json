@@ -1,0 +1,19 @@
+{
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es2021": true,
+        "node": true
+    },
+    "extends": [
+        "standard"
+    ],
+    "parserOptions": {
+      "ecmaVersion"       : "latest",
+      "es6"               : true,
+      "requireConfigFile" : false
+    },
+    "parser" : "@babel/eslint-parser",
+    "rules": {
+    }
+}
