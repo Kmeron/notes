@@ -1,4 +1,3 @@
-
 const { sequelize, DT } = require('../db.js')
 // const { Note } = require('./note.js')
 
@@ -8,7 +7,7 @@ const User = sequelize.define('user', {
     autoIncrement: true,
     primaryKey: true
   },
-  login: {
+  email: {
     type: DT.STRING(30),
     unique: true,
     allowNull: false

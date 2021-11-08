@@ -13,7 +13,7 @@ function getNotes (params = {}) {
         })
         .then(result => {
           const data = result.selectResult.map(element => dumpNote(element.dataValues))
-          const meta = { limit: +params.limit, offset: +params.offset, totalCount: result.countResult }
+          const meta = { limit: params.limit, offset: params.offset, totalCount: result.countResult }
           return transaction.commit().then(() => ({ data, meta }))
         })
         .catch(error => {
@@ -37,8 +37,8 @@ function chooseArgument (params) {
       { userId: params.userId }
     ],
     order: [['id', 'DESC']],
-    limit: +params.limit,
-    offset: +params.offset
+    limit: params.limit,
+    offset: params.offset
   }
 
   if (params.search) {
@@ -141,7 +141,6 @@ function editNoteById ({ title, text, id, userId }) {
 }
 
 function dumpNote (note) {
-  console.log(note)
   return {
     id: note.id,
     title: note.title,

@@ -1,9 +1,11 @@
 const ServiceError = require('../ServiceError')
+const ValidationError = require('../ValidationError')
+
+const Joi = require('joi')
 
 function responseToClient (res, promise) {
   promise
     .then(result => {
-      console.log(result)
       const data = result?.data ? result : { data: result }
       res.send({ ok: true, ...data })
     })
@@ -27,17 +29,39 @@ function responseToClient (res, promise) {
     })
 }
 
-function makeServiceRunner (service, dumpData) {
+function makeServiceRunner ({ service, validationRules }, dumpData) {
   return (req, res) => {
-    const payload = dumpData(req, res)
+    try {
+      const payload = dumpData(req, res)
+      console.log(payload)
+      const validPayload = Joi.object(validationRules).validate(payload, { abortEarly: false })
 
-    responseToClient(res, service(payload))
+      if (validPayload.error) {
+        console.log(validPayload.error.details)
+        throw new ValidationError({
+          message: validPayload.error.details.map(e => e.message),
+          code: 'INVALID_DATA_ERROR',
+          path: validPayload.error.details.map(e => e.path[0])
+        })
+      }
+
+      responseToClient(res, service({ ...validPayload.value }))
+    } catch (error) {
+      console.log(error)
+      res.send({
+        ok: false,
+        error: { message: error.message, code: error.code, path: error.path }
+      })
+    }
   }
 }
 
 function verifyMailSender (service, dumpData) {
   return (req, res) => {
     const payload = dumpData(req, res)
+    console.log(payload)
+
+    // schema.validate(payload)
 
     service(payload)
       .then(() => res.redirect('/authorization'))

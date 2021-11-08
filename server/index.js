@@ -4,7 +4,7 @@ const { sequelize } = require('./sequelize.js')
 
 const app = express()
 
-const pathToStaticFiles = path.resolve('client', 'public')
+const pathToStaticFiles = path.resolve('..', 'client', 'public')
 
 const router = require('./router')
 
