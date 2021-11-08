@@ -2,10 +2,17 @@ const express = require('express')
 const router = express.Router()
 
 const { checkSession } = require('./middlewares')
-const controllers = require('./сontrollers')
+const controllers = require('./controllers')
 
 // router.use((req, res, next) => {
-//     next()
+// req.query = Object.fromEntries(Object.entries(req.query).map(([key, value]) => {
+//   if (!isNaN(value)) {
+//     value = +value
+//   }
+//   return [key, value]
+// })
+// )
+//   next()
 // })
 
 router

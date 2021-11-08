@@ -1,11 +1,11 @@
 import {requestToServer} from './utils.js'
-const login = document.getElementById('login')
+const email = document.getElementById('email')
 const password = document.getElementById('password')
 const signUp = document.getElementById('sign-up')
 
 signUp.onclick = () => {
     const payload = {
-        login: login.value,
+        email: email.value,
         password: password.value
     }
     return requestToServer('/registration', {
@@ -20,7 +20,7 @@ signUp.onclick = () => {
     })
     .catch(error => {
         alert(error.message)
-        login.value = ''
+        email.value = ''
         password.value = ''
     })
 }

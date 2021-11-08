@@ -11,6 +11,10 @@ export function requestToServer(route, options) {
             if (body.ok){
                 return body
             } 
+            const serviceErrors = ['limit', 'offset']
+            if (body.error.path.some(element => serviceErrors.includes(element))) {
+              body.error.message = 'Oops, seems like something has gone bad!'
+            }
             throw body.error
         })
 }
