@@ -56,16 +56,29 @@ function makeServiceRunner ({ service, validationRules }, dumpData) {
   }
 }
 
-function verifyMailSender (service, dumpData) {
+function verifyMailSender ({ service, validationRules }, dumpData) {
   return (req, res) => {
-    const payload = dumpData(req, res)
-    console.log(payload)
+    try {
+      const payload = dumpData(req, res)
+      console.log(payload)
+      const validPayload = Joi.object(validationRules).validate(payload, { abortEarly: false })
 
-    // schema.validate(payload)
+      if (validPayload.error) {
+        console.log(validPayload.error.details)
+        throw new ValidationError({
+          message: validPayload.error.details.map(e => e.message),
+          code: 'INVALID_DATA_ERROR',
+          path: validPayload.error.details.map(e => e.path[0])
+        })
+      }
 
-    service(payload)
-      .then(() => res.redirect('/authorization'))
-      .catch(() => res.send('<html><p>You have already verified your email!</p></html>'))
+      service(payload)
+        .then(() => res.redirect('/authorization'))
+        .catch(() => res.send('<html><p>You have already verified your email!</p></html>'))
+    } catch (error) {
+      console.log(error)
+      res.send(`<html><p>Oops, something has gone wrong: ${error.message}</p></html>`)
+    }
   }
 }
 
