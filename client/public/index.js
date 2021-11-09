@@ -72,16 +72,11 @@ function getNotes(query = {}) {
         data.forEach(note => {
             const noteContainer = document.createElement('div')
 
-            const deleteNote = document.createElement('button')
-            deleteNote.textContent = 'delete'
-
             const editNote = document.createElement('button')
             editNote.textContent = 'edit'
-
-            const titleArticle = document.createElement('p')
-            titleArticle.innerText = 'Title: '
-            const textArticle = document.createElement('p')
-            textArticle.innerText = 'Text: '
+            
+            const deleteNote = document.createElement('button')
+            deleteNote.textContent = 'delete'
 
             const newTitleArea = document.createElement('p') 
             newTitleArea.innerText = `${note.title} ` 
@@ -89,12 +84,10 @@ function getNotes(query = {}) {
             const newTextArea = document.createElement('p')
             newTextArea.innerText = `${note.text} `
             
-            noteContainer.appendChild(titleArticle)
             noteContainer.appendChild(newTitleArea)
-            noteContainer.appendChild(textArticle)
             noteContainer.appendChild(newTextArea)
-            noteContainer.appendChild(deleteNote)
             noteContainer.appendChild(editNote)
+            noteContainer.appendChild(deleteNote)
             notesArea.appendChild(noteContainer)
 
             deleteNote.onclick = function() {
