@@ -11,12 +11,12 @@ function responseToClient (res, promise) {
     })
     .catch(error => {
       console.warn(error)
-      if (error instanceof ServiceError) {
+      if (error instanceof ServiceError || error instanceof ValidationError) {
         res
           .status(400)
           .send({
             ok: false,
-            error: { message: error.message, code: error.code }
+            error: { message: error.message, code: error.code, fields: error.fields }
           })
       } else {
         res
@@ -31,54 +31,45 @@ function responseToClient (res, promise) {
 
 function makeServiceRunner ({ service, validationRules }, dumpData) {
   return (req, res) => {
-    try {
-      const payload = dumpData(req, res)
-      console.log(payload)
-      const validPayload = Joi.object(validationRules).validate(payload, { abortEarly: false })
-
-      if (validPayload.error) {
-        console.log(validPayload.error.details)
+    const payload = dumpData(req, res)
+    console.log(payload)
+    const promise = Joi.object(validationRules)
+      .validateAsync(payload, { abortEarly: false })
+      .catch(error => {
         throw new ValidationError({
-          message: validPayload.error.details.map(e => e.message),
+          message: 'Invalid data provided with request',
           code: 'INVALID_DATA_ERROR',
-          path: validPayload.error.details.map(e => e.path[0])
+          fields: error.details.map(e => e.path[0])
         })
-      }
-
-      responseToClient(res, service({ ...validPayload.value }))
-    } catch (error) {
-      console.log(error)
-      res.send({
-        ok: false,
-        error: { message: error.message, code: error.code, path: error.path }
       })
-    }
+      .then(service)
+
+    responseToClient(res, promise)
   }
 }
 
 function verifyMailSender ({ service, validationRules }, dumpData) {
   return (req, res) => {
-    try {
-      const payload = dumpData(req, res)
-      console.log(payload)
-      const validPayload = Joi.object(validationRules).validate(payload, { abortEarly: false })
-
-      if (validPayload.error) {
-        console.log(validPayload.error.details)
+    const payload = dumpData(req, res)
+    console.log(payload)
+    Joi.object(validationRules)
+      .validateAsync(payload, { abortEarly: false })
+      .catch(error => {
+        console.log(error)
         throw new ValidationError({
-          message: validPayload.error.details.map(e => e.message),
+          message: 'Provided invalid token to activate your account',
           code: 'INVALID_DATA_ERROR',
-          path: validPayload.error.details.map(e => e.path[0])
+          path: error.details.map(e => e.path[0])
         })
-      }
-
-      service(payload)
-        .then(() => res.redirect('/authorization'))
-        .catch(() => res.send('<html><p>You have already verified your email!</p></html>'))
-    } catch (error) {
-      console.log(error)
-      res.send(`<html><p>Oops, something has gone wrong: ${error.message}</p></html>`)
-    }
+      })
+      .then(service)
+      .then(() => res.redirect('/authorization'))
+      .catch(error => {
+        if (error instanceof ValidationError) {
+          res.send(`<html><p>Oops, ${error.message}</p></html>`)
+        }
+        res.send(`<html><p>Oops, something has gone wrong: ${error.message}</p></html>`)
+      })
   }
 }
 

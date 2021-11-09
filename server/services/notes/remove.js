@@ -5,28 +5,27 @@ const Joi = require('joi')
 // const { Op } = require('sequelize')
 
 function deleteNoteById ({ id, userId }) {
-  return sequelize.transaction()
-    .then((transaction) => {
-      return Note.destroy({
-        where: {
-          id,
-          userId
-        }
-      }, { transaction })
-        .then(result => {
-          if (!result) {
-            return transaction.rollback()
-              .then(() => {
-                throw new ServiceError({
-                  message: 'Provided non-existent note id',
-                  code: 'INVALID_NOTE_ID'
-                })
+  return sequelize.transaction().then((transaction) => {
+    return Note.destroy({
+      where: {
+        id,
+        userId
+      }
+    }, { transaction })
+      .then(result => {
+        if (!result) {
+          return transaction.rollback()
+            .then(() => {
+              throw new ServiceError({
+                message: 'Provided non-existent note id',
+                code: 'INVALID_NOTE_ID'
               })
-          }
-          return transaction.commit()
-            .then(() => {})
-        })
-    })
+            })
+        }
+        return transaction.commit()
+          .then(() => {})
+      })
+  })
 }
 
 const validationRules = {

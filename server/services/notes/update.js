@@ -6,42 +6,41 @@ const Joi = require('joi')
 // const { Op } = require('sequelize')
 
 function editNoteById ({ title, text, id, userId }) {
-  return sequelize.transaction()
-    .then((transaction) => {
-      return Note.update({
-        title,
-        text
-      }, {
-        where: {
-          id,
-          userId
-        }
-      }, { transaction })
-        .then(() => {
-          return Note.findOne({
-            where: {
-              id,
-              userId
+  return sequelize.transaction().then((transaction) => {
+    return Note.update({
+      title,
+      text
+    }, {
+      where: {
+        id,
+        userId
+      }
+    }, { transaction })
+      .then(() => {
+        return Note.findOne({
+          where: {
+            id,
+            userId
+          }
+        }, { transaction })
+      })
+      .then(note => {
+        return transaction.commit()
+          .then(() => dumpNote(note))
+      })
+      .catch(error => {
+        return transaction.rollback()
+          .then(() => {
+            if (error.code === 'ER_PARSE_ERROR') {
+              throw new ServiceError({
+                message: 'Provided invalid data for editing note',
+                code: 'INVALID_DATA'
+              })
             }
-          }, { transaction })
-        })
-        .then(note => {
-          return transaction.commit()
-            .then(() => dumpNote(note))
-        })
-        .catch(error => {
-          return transaction.rollback()
-            .then(() => {
-              if (error.code === 'ER_PARSE_ERROR') {
-                throw new ServiceError({
-                  message: 'Provided invalid data for editing note',
-                  code: 'INVALID_DATA'
-                })
-              }
-              throw error
-            })
-        })
-    })
+            throw error
+          })
+      })
+  })
 }
 
 const validationRules = {

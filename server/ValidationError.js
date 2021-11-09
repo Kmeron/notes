@@ -3,7 +3,6 @@ class ValidationError extends Error {
     super(message)
     this.code = code
     this.fields = fields
-    this.path = path
   }
 }
 module.exports = ValidationError
