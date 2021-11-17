@@ -9,11 +9,8 @@
         "standard"
     ],
     "parserOptions": {
-      "ecmaVersion"       : "latest",
-      "es6"               : true,
-      "requireConfigFile" : false
+        "ecmaVersion": 12
     },
-    "parser" : "@babel/eslint-parser",
     "rules": {
     }
 }

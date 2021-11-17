@@ -18,6 +18,11 @@ const find = document.getElementById('find')
 
 const pageButtonsArea = document.getElementById('page-buttons-area')
 
+const inputFile = document.getElementById('fileUpload')
+
+const send = document.getElementById('send')
+send.disabled = true
+
 let pagination = {step: 10, page: 1}
 
 initialization()
@@ -243,6 +248,42 @@ function initialization() {
         location.href = '/authorization'
     } else {
         getNotes(getPagination())
-            .then(({meta})=> createPageButtons(meta))
+            .then(({meta}) => createPageButtons(meta))
     }
+}
+
+// Code to open upload window
+const dialog = document.querySelector('dialog');
+document.querySelector('#import').onclick = function() {
+  dialog.show();
+};
+document.querySelector('#close').onclick = function() {
+  dialog.close();
+}
+//
+
+inputFile.addEventListener('change', () => {
+	send.disabled = false
+})
+
+send.onclick = () => {
+	const file = inputFile.files[0]
+	const fd = new FormData();
+    fd.append('fileUpload', file)
+	return requestToServer('/upload', {
+		method: 'POST',
+		body: fd
+	})
+    .then(() => {
+        pagination.page = 1
+        const currentPagination = getPagination()
+        return getNotes(currentPagination)
+    })
+    .then(data=> {
+        createPageButtons(data.meta)
+        return data
+    })
+    .catch(error => alert(error.message))
+
+
 }

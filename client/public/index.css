@@ -37,6 +37,31 @@ button:focus {
   outline: none;
 }
 
+label {
+  width: fit-content;
+  background-color: #fbfcfd;
+  text-align: center;
+  color: black;
+  font-size: 16px;
+  font-family: 'Noto Sans Display', sans-serif;
+  border-radius: 16px;
+  border: 2px solid #fbfcfd;
+  transition-duration: 0.2s;
+  margin: 16px;  
+  height: 40px;  
+  padding: 1px 6px;
+}
+
+label:hover {
+  border: 2px solid #93a7a6;
+  background-color: #fbfcfd;
+  color: black;
+}
+
+label:focus {
+  outline: none;
+}
+
 .index {
   display:flex;
   max-width: 600px;
@@ -126,5 +151,11 @@ button:focus {
 }
 #notes-area p:first-of-type{
   font-weight: bold;
+}
+
+dialog {
+  background-color: #deefed;
+  border-radius: 16px;
+  border: 2px solid #93a7a6;
 }
 
