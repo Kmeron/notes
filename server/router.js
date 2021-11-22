@@ -38,4 +38,8 @@ router
   .route('/authentication')
   .get(checkSession, controllers.users.verify)
 
+router
+  .route('/upload')
+  .post(checkSession, controllers.notes.upload)//
+
 module.exports = router
