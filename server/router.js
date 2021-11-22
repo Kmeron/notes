@@ -40,6 +40,28 @@ router
 
 router
   .route('/upload')
-  .post(checkSession, controllers.notes.upload)//
+  .post(checkSession, controllers.notes.upload)
+  // .post(checkSession, (req, res, next) => {
+  //   let acc = ''
+  //   let notes = ''
+  //   req.setEncoding('utf8')
+  //   req.on('data', chunk => {
+  //     req.pause()
+  //     acc += chunk
+  //     while (acc.includes('\n')) {
+  //       const cutIndex = acc.lastIndexOf('\n')
+  //       console.log(cutIndex)
+  //       const last = acc.slice(cutIndex + 2)
+  //       const full = acc.replace(last, '')
+  //       acc = last
+  //       notes += full
+  //     }
+  //     req.resume()
+  //   })
+  //   req.on('end', () => {
+  //     req.body = { notes }
+  //     next()
+  //   })
+  // }, controllers.notes.upload)//
 
 module.exports = router

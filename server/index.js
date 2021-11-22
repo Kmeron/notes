@@ -1,7 +1,6 @@
 const path = require('path')
 const express = require('express')
 const { sequelize } = require('./sequelize.js')
-const fileUpload = require('express-fileupload')
 
 const app = express()
 
@@ -12,7 +11,6 @@ const router = require('./router')
 app
   .use(express.static(pathToStaticFiles, { extensions: ['html'] }))
   .use(express.json())
-  .use(fileUpload())
   .use('/api/v1', router)
 
 sequelize.sync()
