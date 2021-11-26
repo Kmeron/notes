@@ -268,11 +268,11 @@ inputFile.addEventListener('change', () => {
 
 send.onclick = () => {
 	const file = inputFile.files[0]
-	const fd = new FormData();
-    fd.append('fileUpload', file)
+    console.log(file)
 	return requestToServer('/upload', {
 		method: 'POST',
-		body: fd
+		body: file,
+        headers: {'Content-Type': 'text/plain'}
 	})
     .then(() => {
         pagination.page = 1
