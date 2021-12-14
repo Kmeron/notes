@@ -1,6 +1,7 @@
 const path = require('path')
 const express = require('express')
 const { sequelize } = require('./sequelize.js')
+const cors = require('cors')
 
 const app = express()
 
@@ -11,6 +12,7 @@ const router = require('./router')
 app
   .use(express.static(pathToStaticFiles, { extensions: ['html'] }))
   .use(express.json())
+  .use(cors({ origin: '*' }))
   .use('/api/v1', router)
 
 sequelize.sync()

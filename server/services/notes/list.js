@@ -52,13 +52,13 @@ const validationRules = {
 
   limit: Joi.number()
     .integer()
-    .positive()
-    .required(),
+    .positive(),
+  // .required(),
 
   offset: Joi.number()
     .integer()
-    .min(0)
-    .required(),
+    .min(0),
+  // .required(),
 
   search: Joi.string()
 }
