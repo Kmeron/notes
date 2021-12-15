@@ -35,26 +35,32 @@ function App () {
     })
     .catch(error => alert(error.message)), [offset])
 
-  const handleOnClickCreateNoteButton = () => createNote(noteData)
-    .then(() => {
-      setNoteData({ title: '', text: '' })
-      return getNotes({ limit, offset: 0 })
-    })
-    .then(({ data, meta }) => {
-      setNotes(data)
-      setTotalNotes(meta.totalCount)
-      setOffset(meta.offset)
-    })
-    .catch(error => alert(error.message))
+  const handleOnClickCreateNoteButton = () => {
+    if (!noteData.title || noteData.text) return
+    createNote(noteData)
+      .then(() => {
+        setNoteData({ title: '', text: '' })
+        return getNotes({ limit, offset: 0 })
+      })
+      .then(({ data, meta }) => {
+        setNotes(data)
+        setTotalNotes(meta.totalCount)
+        setOffset(meta.offset)
+      })
+      .catch(error => alert(error.message))
+  }
 
-  const handleOnClickSaveNoteButton = (payload) => saveNote(payload)
-    .then(({ data }) => {
-      const editedIndex = notes.findIndex(note => note.id === data.id)
-      const editedArr = [...notes]
-      editedArr.splice(editedIndex, 1, data)
-      setNotes(editedArr)
-    })
-    .catch(error => alert(error.message))
+  const handleOnClickSaveNoteButton = (payload) => {
+    if (!payload.title || !payload.text) return
+    return saveNote(payload)
+      .then(({ data }) => {
+        const editedIndex = notes.findIndex(note => note.id === data.id)
+        const editedArr = [...notes]
+        editedArr.splice(editedIndex, 1, data)
+        setNotes(editedArr)
+      })
+      .catch(error => alert(error.message))
+  }
 
   const handleOnClickDeleteNoteButton = (noteId) => deleteNote(noteId)
     .then(() => getNotes({ limit, offset, search }))
@@ -99,12 +105,15 @@ function App () {
     setOffset(params.offset)
   }
 
-  const handleOnClickFindButton = (search) => getNotes({ limit, offset: 0, search })
-    .then(({ data, meta }) => {
-      setNotes(data)
-      setTotalNotes(meta.totalCount)
-      setOffset(0)
-    })
+  const handleOnClickFindButton = (search) => {
+    if (!search) return
+    getNotes({ limit, offset: 0, search })
+      .then(({ data, meta }) => {
+        setNotes(data)
+        setTotalNotes(meta.totalCount)
+        setOffset(0)
+      })
+  }
 
   return (
     <div className="App">

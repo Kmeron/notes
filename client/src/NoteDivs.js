@@ -17,7 +17,10 @@ function NoteDivs ({ notes, saveFn, deleteFn }) {
           <div key={note.id} >
             <EditTitleInput value={editNote.title} onChange={current => setEditNote(previous => ({ ...previous, ...current }))}/>
             <EditTextInput value={editNote.text} onChange={current => setEditNote(previous => ({ ...previous, ...current }))}/>
-            <Save onClick={() => saveFn(editNote).then(() => setEditNote(null))} />
+            <Save onClick={() => {
+              saveFn(editNote)
+              setEditNote(null)
+            }}/>
           </div>
             )
           : (
@@ -36,7 +39,7 @@ function NoteDivs ({ notes, saveFn, deleteFn }) {
 NoteDivs.propTypes = {
   notes: PropTypes.array.isRequired,
   saveFn: PropTypes.func.isRequired,
-  deleteFn: PropTypes.array.isRequired
+  deleteFn: PropTypes.func.isRequired
 }
 
 export default NoteDivs
