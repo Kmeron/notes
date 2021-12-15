@@ -42,6 +42,7 @@ module.exports = {
       importFile(payload)
         .then(result => {
           const data = result?.data ? result : { data: result }
+          console.log(data)
           res.send({ ok: true, ...data })
         })
         .catch(error => {

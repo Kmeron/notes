@@ -6,6 +6,7 @@ const Joi = require('joi')
 function responseToClient (res, promise) {
   promise
     .then(result => {
+      console.log(result)
       const data = result?.data ? result : { data: result }
       res.send({ ok: true, ...data })
     })
