@@ -1,10 +1,9 @@
-import requestToServer from "./utils";
+import requestToServer from './utils'
 
-export default function uploadFile(file) {
-
+export default function uploadFile (file) {
   return requestToServer('/upload', {
-		method: 'POST',
-		body: file,
-        headers: {'Content-Type': 'text/plain'}
-	})
+    method: 'POST',
+    body: file,
+    headers: { 'Content-Type': 'text/plain' }
+  })
 }

@@ -1,9 +1,7 @@
-import requestToServer from "./utils";
+import requestToServer from './utils'
 
-export default function deleteAllNotes() {
-
+export default function deleteAllNotes () {
   return requestToServer('/notes/delete-all', {
-    method: 'DELETE',
+    method: 'DELETE'
   })
-  
 }

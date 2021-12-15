@@ -1,5 +1,4 @@
-export default function SignOut() {
-  
+export default function SignOut () {
   // function signOut() {
   // TODO /authorization
   // }

@@ -1,45 +1,44 @@
-import './App.css';
-import FindButton from './buttons/Find';
-import SignOut from './buttons/SignOut';
-import FindInput from './inputs/FindInput';
-import CreateTitleInput from './inputs/CreateTitleInput';
-import CreateTextInput from './inputs/CreateTextInput';
-import Create from './buttons/Create';
-import DeleteAll from './buttons/DeleteAll';
-import UploadFileInput from './inputs/FileUploadInput';
+import './App.css'
+import FindButton from './buttons/Find'
+import SignOut from './buttons/SignOut'
+import FindInput from './inputs/FindInput'
+import CreateTitleInput from './inputs/CreateTitleInput'
+import CreateTextInput from './inputs/CreateTextInput'
+import Create from './buttons/Create'
+import DeleteAll from './buttons/DeleteAll'
+import UploadFileInput from './inputs/FileUploadInput'
 
 import { useState, useEffect } from 'react'
-import getNotes from './api/getNotes';
-import createNote from './api/createNote';
-import deleteAllNotes from './api/deleteAllNotes';
-import saveNote from './api/saveNote';
-import NoteDivCreator from './NoteDivCreator';
-import deleteNote from './api/deleteNote';
-import uploadFile from './api/uploadFile';
-import PageButtonsCreator from './PageButtonsCreator';
+import getNotes from './api/getNotes'
+import createNote from './api/createNote'
+import deleteAllNotes from './api/deleteAllNotes'
+import saveNote from './api/saveNote'
+import deleteNote from './api/deleteNote'
+import uploadFile from './api/uploadFile'
 
-function App() {
-  
+import PageButtons from './PageButtons'
+import NoteDivs from './NoteDivs'
+
+function App () {
   const [search, setSearchValue] = useState('')
   const [notes, setNotes] = useState([])
-  const [noteData, setNoteData] = useState({title: '', text: ''})
+  const [noteData, setNoteData] = useState({ title: '', text: '' })
   const [totalNotes, setTotalNotes] = useState(0)
   const [offset, setOffset] = useState(0)
 
   const limit = 5
 
-  useEffect(() => getNotes({limit, offset: 0})
+  useEffect(() => getNotes({ limit, offset, search })
     .then(({ data, meta }) => {
       setNotes(data)
       setTotalNotes(meta.totalCount)
-      setOffset(meta.offset)
     })
-    .catch(error => alert(error.message)), [])
+    .catch(error => alert(error.message)), [offset])
 
   const handleOnClickCreateNoteButton = () => createNote(noteData)
     .then(() => {
-      setNoteData({title: '', text: ''})
-      return getNotes({limit, offset: 0})
+      setNoteData({ title: '', text: '' })
+      return getNotes({ limit, offset: 0 })
     })
     .then(({ data, meta }) => {
       setNotes(data)
@@ -56,13 +55,13 @@ function App() {
       setNotes(editedArr)
     })
     .catch(error => alert(error.message))
-  
+
   const handleOnClickDeleteNoteButton = (noteId) => deleteNote(noteId)
-    .then(() => getNotes({ limit, offset }))
+    .then(() => getNotes({ limit, offset, search }))
     .then(({ data, meta }) => {
       if (meta.offset >= meta.totalCount) {
-        return getNotes({limit, offset: offset - 5})
-          .then(({data, meta}) => {
+        return getNotes({ limit, offset: offset - 5, search })
+          .then(({ data, meta }) => {
             setNotes(data)
             setTotalNotes(meta.totalCount)
             setOffset(meta.offset)
@@ -71,10 +70,9 @@ function App() {
       setNotes(data)
       setTotalNotes(meta.totalCount)
     })
-    .catch(error => alert(error.message))  
-  
-  const handleOnClickDeleteAllNotes = () => {
+    .catch(error => alert(error.message))
 
+  const handleOnClickDeleteAllNotes = () => {
     if (window.confirm('All your notes will be removed!')) {
       deleteAllNotes()
         .then(() => {
@@ -88,7 +86,7 @@ function App() {
 
   const handleOnClickSendFileButton = (file) => {
     return uploadFile(file)
-      .then(() => getNotes({limit, offset: 0}))
+      .then(() => getNotes({ limit, offset: 0 }))
       .then(({ data, meta }) => {
         setNotes(data)
         setOffset(meta.offset)
@@ -98,13 +96,15 @@ function App() {
   }
 
   const handleOnClickPageButton = (params) => {
-    return getNotes(params)
-      .then(({ data, meta}) => {
-        setNotes(data)
-        setOffset(meta.offset)
-      })
-      .catch(error => alert(error.message))
+    setOffset(params.offset)
   }
+
+  const handleOnClickFindButton = (search) => getNotes({ limit, offset: 0, search })
+    .then(({ data, meta }) => {
+      setNotes(data)
+      setTotalNotes(meta.totalCount)
+      setOffset(0)
+    })
 
   return (
     <div className="App">
@@ -112,16 +112,16 @@ function App() {
 
       <div id="search-block">
         <FindInput onChange={setSearchValue}/>
-        <FindButton onClick={() => getNotes({search}).then(({data}) => setNotes(data))}/>
+        <FindButton onClick={() => handleOnClickFindButton(search)}/>
       </div>
 
       <div id="create-block">
 
         <p type="text">Title:</p>
-        <CreateTitleInput value={noteData.title} onChange={current => setNoteData(previous => ({...previous, ...current}))}/>
+        <CreateTitleInput value={noteData.title} onChange={current => setNoteData(previous => ({ ...previous, ...current }))}/>
 
         <p type="text">Text:</p>
-        <CreateTextInput value={noteData.text} onChange={current => setNoteData(previous => ({...previous, ...current}))}/>
+        <CreateTextInput value={noteData.text} onChange={current => setNoteData(previous => ({ ...previous, ...current }))}/>
 
         <div id="create-buttons">
 
@@ -131,15 +131,15 @@ function App() {
 
         </div>
 
-        <NoteDivCreator notes={notes} 
-          saveFn={note => handleOnClickSaveNoteButton(note)} 
+        <NoteDivs notes={notes}
+          saveFn={note => handleOnClickSaveNoteButton(note)}
           deleteFn={noteId => handleOnClickDeleteNoteButton(noteId)}/>
 
       </div>
 
-      <PageButtonsCreator totalCount={totalNotes} limit={limit} pageOffset={offset} onClick={params => handleOnClickPageButton(params)}/> 
+      <PageButtons totalCount={totalNotes} limit={limit} offset={offset} onClick={params => handleOnClickPageButton(params)}/>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
