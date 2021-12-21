@@ -64,7 +64,7 @@ function verifyMailSender ({ service, validationRules }, dumpData) {
         })
       })
       .then(service)
-      .then(() => res.redirect('/authorization'))
+      .then(() => res.redirect('http://localhost:3001/authorization'))
       .catch(error => {
         if (error instanceof ValidationError) {
           res.send(`<html><p>Oops, ${error.message}</p></html>`)
