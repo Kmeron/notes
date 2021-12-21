@@ -1,9 +1,8 @@
-// const jwt = localStorage.getItem('jwt')
-
 export default function requestToServer (route, options) {
+  const jwt = localStorage.getItem('jwt')
   options.headers = {
     ...options.headers,
-    Authorization: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjd9.mF228cC-dd8LWZUGcgDd3aIO6yKkN_MMm55FXGWjp_0'
+    Authorization: jwt
   }
   return fetch('http://localhost:3000/api/v1' + route, options)
     .then(response => response.json())

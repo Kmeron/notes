@@ -19,6 +19,8 @@ import uploadFile from './api/uploadFile'
 import PageButtons from './PageButtons'
 import NoteDivs from './NoteDivs'
 
+import { useNavigate } from 'react-router-dom'
+
 function App () {
   const [search, setSearchValue] = useState('')
   const [notes, setNotes] = useState([])
@@ -26,16 +28,25 @@ function App () {
   const [totalNotes, setTotalNotes] = useState(0)
   const [offset, setOffset] = useState(0)
 
+  const navigate = useNavigate()
+
   const limit = 5
 
-  useEffect(() => getNotes({ limit, offset, search })
-    .then(({ data, meta }) => {
-      setNotes(data)
-      setTotalNotes(meta.totalCount)
-    })
-    .catch(error => alert(error.message)), [offset])
+  useEffect(() => {
+    if (!localStorage.getItem('jwt')) {
+      alert('Please, authorize!')
+      return navigate('/authorization')
+    }
+    getNotes({ limit, offset, search })
+      .then(({ data, meta }) => {
+        setNotes(data)
+        setTotalNotes(meta.totalCount)
+      })
+      .catch(error => alert(error.message))
+  }, [offset])
 
   const handleOnClickCreateNoteButton = () => {
+    console.log(noteData)
     if (!noteData.title || noteData.text) return
     createNote(noteData)
       .then(() => {
@@ -115,9 +126,14 @@ function App () {
       })
   }
 
+  const handleOnClickSignOutButton = () => {
+    localStorage.removeItem('jwt')
+    navigate('/authorization')
+  }
+
   return (
     <div className="App">
-      <SignOut />
+      <SignOut onClick={() => handleOnClickSignOutButton()}/>
 
       <div id="search-block">
         <FindInput onChange={setSearchValue}/>
@@ -147,6 +163,7 @@ function App () {
       </div>
 
       <PageButtons totalCount={totalNotes} limit={limit} offset={offset} onClick={params => handleOnClickPageButton(params)}/>
+
     </div>
   )
 }
