@@ -1,10 +1,6 @@
 import PropTypes from 'prop-types'
 
 function SignOut ({ onClick }) {
-  // function signOut() {
-  // TODO /authorization
-  // }
-
   return (
     <div>
       <button onClick={onClick}>

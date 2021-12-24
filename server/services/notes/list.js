@@ -5,27 +5,45 @@ const Joi = require('joi')
 const dumpNote = require('./dump')
 // const { Op } = require('sequelize')
 
-function getNotes (params = {}) {
-  return sequelize.transaction().then((transaction) => {
-    return Note.findAndCountAll(parseQuery(params), { transaction })
-      .then(({ rows, count }) => {
-        const data = rows.map(element => dumpNote(element.dataValues))
-        const meta = { limit: params.limit, offset: params.offset, totalCount: count }
-        return transaction.commit().then(() => ({ data, meta }))
+async function getNotes (params = {}) {
+  const transaction = await sequelize.transaction()
+
+  try {
+    const { rows, count } = await Note.findAndCountAll(parseQuery(params), { transaction })
+    const data = rows.map(element => dumpNote(element.dataValues))
+    const meta = { limit: params.limit, offset: params.offset, totalCount: count }
+    await transaction.commit()
+    return { data, meta }
+  } catch (error) {
+    await transaction.rollback()
+    if (['ER_PARSE_ERROR', 'ER_SP_UNDECLARED_VAR'].includes(error.code)) {
+      throw new ServiceError({
+        message: 'Provided invalid data for getting note',
+        code: 'INVALID_DATA'
       })
-      .catch(error => {
-        return transaction.rollback()
-          .then(() => {
-            if (['ER_PARSE_ERROR', 'ER_SP_UNDECLARED_VAR'].includes(error.code)) {
-              throw new ServiceError({
-                message: 'Provided invalid data for getting note',
-                code: 'INVALID_DATA'
-              })
-            }
-            throw error
-          })
-      })
-  })
+    }
+    throw error
+  }
+  // return sequelize.transaction().then((transaction) => {
+  //   return Note.findAndCountAll(parseQuery(params), { transaction })
+  //     .then(({ rows, count }) => {
+  //       const data = rows.map(element => dumpNote(element.dataValues))
+  //       const meta = { limit: params.limit, offset: params.offset, totalCount: count }
+  //       return transaction.commit().then(() => ({ data, meta }))
+  //     })
+  //     .catch(error => {
+  //       return transaction.rollback()
+  //         .then(() => {
+  //           if (['ER_PARSE_ERROR', 'ER_SP_UNDECLARED_VAR'].includes(error.code)) {
+  //             throw new ServiceError({
+  //               message: 'Provided invalid data for getting note',
+  //               code: 'INVALID_DATA'
+  //             })
+  //           }
+  //           throw error
+  //         })
+  //     })
+  // })
 }
 
 function parseQuery (params) {
@@ -52,13 +70,13 @@ const validationRules = {
 
   limit: Joi.number()
     .integer()
-    .positive(),
-  // .required(),
+    .positive()
+    .required(),
 
   offset: Joi.number()
     .integer()
-    .min(0),
-  // .required(),
+    .min(0)
+    .required(),
 
   search: Joi.string()
 }

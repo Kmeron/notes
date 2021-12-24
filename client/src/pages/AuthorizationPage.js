@@ -12,12 +12,21 @@ function AuthorizationPage () {
   const [credentials, setCredentials] = useState({ email: '', password: '' })
   const navigate = useNavigate()
 
-  const handleOnClickSignInButton = (payload) => authorizeUser(payload)
-    .then(({ data }) => {
+  const handleOnClickSignInButton = async (payload) => {
+    try {
+      const { data } = await authorizeUser(payload)
       localStorage.setItem('jwt', data.jwt)
       navigate('/')
-    })
-    .catch(error => alert(error.message))
+    } catch (error) {
+      alert(error.message)
+    }
+    // authorizeUser(payload)
+    // .then(({ data }) => {
+    //   localStorage.setItem('jwt', data.jwt)
+    //   navigate('/')
+    // })
+    // .catch(error => alert(error.message))
+  }
 
   return (
     <div id="auth-block">
