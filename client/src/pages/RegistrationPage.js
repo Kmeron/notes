@@ -11,13 +11,20 @@ export default function RegistrationPage () {
 
   const [credentials, setCredentials] = useState({ email: '', password: '' })
 
-  const handleOnClickSignOutButton = (payload) => {
-    registerUser(payload)
-      .then(() => {
-        alert('Congratulations! You have just registered. Please check your email to verify account!')
-        navigate('/authorization')
-      })
-      .catch(error => alert(error.message))
+  const handleOnClickSignOutButton = async (payload) => {
+    try {
+      await registerUser(payload)
+      alert('Congratulations! You have just registered. Please check your email to verify account!')
+      navigate('/authorization')
+    } catch (error) {
+      alert(error.message)
+    }
+    // registerUser(payload)
+    //   .then(() => {
+    //     alert('Congratulations! You have just registered. Please check your email to verify account!')
+    //     navigate('/authorization')
+    //   })
+    //   .catch(error => alert(error.message))
   }
 
   return (

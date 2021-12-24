@@ -45,85 +45,139 @@ function App () {
       .catch(error => alert(error.message))
   }, [offset])
 
-  const handleOnClickCreateNoteButton = () => {
-    console.log(noteData)
-    if (!noteData.title || noteData.text) return
-    createNote(noteData)
-      .then(() => {
-        setNoteData({ title: '', text: '' })
-        return getNotes({ limit, offset: 0 })
-      })
-      .then(({ data, meta }) => {
-        setNotes(data)
-        setTotalNotes(meta.totalCount)
-        setOffset(meta.offset)
-      })
-      .catch(error => alert(error.message))
+  const handleOnClickCreateNoteButton = async () => {
+    if (!noteData.title || !noteData.text) return
+
+    try {
+      await createNote(noteData)
+      setNoteData({ title: '', text: '' })
+      const { data, meta } = await getNotes({ limit, offset: 0 })
+      setNotes(data)
+      setTotalNotes(meta.totalCount)
+      setOffset(0)
+    } catch (error) {
+      alert(error.message)
+    }
+
+    // createNote(noteData)
+    //   .then(() => {
+    //     setNoteData({ title: '', text: '' })
+    //     return getNotes({ limit, offset: 0 })
+    //   })
+    //   .then(({ data, meta }) => {
+    //     setNotes(data)
+    //     setTotalNotes(meta.totalCount)
+    //     setOffset(meta.offset)
+    //   })
+    //   .catch(error => alert(error.message))
   }
 
-  const handleOnClickSaveNoteButton = (payload) => {
+  const handleOnClickSaveNoteButton = async (payload) => {
     if (!payload.title || !payload.text) return
-    return saveNote(payload)
-      .then(({ data }) => {
-        const editedIndex = notes.findIndex(note => note.id === data.id)
-        const editedArr = [...notes]
-        editedArr.splice(editedIndex, 1, data)
-        setNotes(editedArr)
-      })
-      .catch(error => alert(error.message))
+    try {
+      const { data } = await saveNote(payload)
+      const editedIndex = notes.findIndex(note => note.id === data.id)
+      const editedArr = [...notes]
+      editedArr.splice(editedIndex, 1, data)
+      setNotes(editedArr)
+    } catch (error) {
+      alert(error.message)
+    }
+    // return saveNote(payload)
+    //   .then(({ data }) => {
+    //     const editedIndex = notes.findIndex(note => note.id === data.id)
+    //     const editedArr = [...notes]
+    //     editedArr.splice(editedIndex, 1, data)
+    //     setNotes(editedArr)
+    //   })
+    //   .catch(error => alert(error.message))
   }
 
-  const handleOnClickDeleteNoteButton = (noteId) => deleteNote(noteId)
-    .then(() => getNotes({ limit, offset, search }))
-    .then(({ data, meta }) => {
-      if (meta.offset >= meta.totalCount) {
-        return getNotes({ limit, offset: offset - 5, search })
-          .then(({ data, meta }) => {
-            setNotes(data)
-            setTotalNotes(meta.totalCount)
-            setOffset(meta.offset)
-          })
+  const handleOnClickDeleteNoteButton = async (noteId) => {
+    try {
+      await deleteNote(noteId)
+      const { data, meta } = await getNotes({ limit, offset, search })
+      if (meta.offset >= meta.totalCount && meta.totalCount !== 0) {
+        return setOffset(offset - 5)
       }
       setNotes(data)
       setTotalNotes(meta.totalCount)
-    })
-    .catch(error => alert(error.message))
+    } catch (error) {
+      alert(error.message)
+    }
+  // deleteNote(noteId)
+  //   .then(() => getNotes({ limit, offset, search }))
+  //   .then(({ data, meta }) => {
+  //     if (meta.offset >= meta.totalCount) {
+  //       return getNotes({ limit, offset: offset - 5, search })
+  //         .then(({ data, meta }) => {
+  //           setNotes(data)
+  //           setTotalNotes(meta.totalCount)
+  //           setOffset(meta.offset)
+  //         })
+  //     }
+  //     setNotes(data)
+  //     setTotalNotes(meta.totalCount)
+  //   })
+  //   .catch(error => alert(error.message))
+  }
 
-  const handleOnClickDeleteAllNotes = () => {
+  const handleOnClickDeleteAllNotes = async () => {
     if (window.confirm('All your notes will be removed!')) {
-      deleteAllNotes()
-        .then(() => {
-          setNotes([])
-          setTotalNotes(0)
-          setOffset(0)
-        })
-        .catch(error => alert(error.message))
+      try {
+        await deleteAllNotes()
+        setNotes([])
+        setTotalNotes(0)
+        setOffset(0)
+      } catch (error) {
+        alert(error.message)
+      }
+      // deleteAllNotes()
+      //   .then(() => {
+      //     setNotes([])
+      //     setTotalNotes(0)
+      //     setOffset(0)
+      //   })
+      //   .catch(error => alert(error.message))
     }
   }
 
-  const handleOnClickSendFileButton = (file) => {
-    return uploadFile(file)
-      .then(() => getNotes({ limit, offset: 0 }))
-      .then(({ data, meta }) => {
-        setNotes(data)
-        setOffset(meta.offset)
-        setTotalNotes(meta.totalCount)
-      })
-      .catch(error => alert(error.message))
+  const handleOnClickSendFileButton = async (file) => {
+    try {
+      await uploadFile(file)
+      const { data, meta } = await getNotes({ limit, offset: 0 })
+      setNotes(data)
+      setTotalNotes(meta.totalCount)
+      setOffset(meta.offset)
+    } catch (error) {
+      alert(error.message)
+    }
+    // return uploadFile(file)
+    //   .then(() => getNotes({ limit, offset: 0 }))
+    //   .then(({ data, meta }) => {
+    //     setNotes(data)
+    //     setOffset(meta.offset)
+    //     setTotalNotes(meta.totalCount)
+    //   })
+    //   .catch(error => alert(error.message))
   }
 
   const handleOnClickPageButton = (params) => {
     setOffset(params.offset)
   }
 
-  const handleOnClickFindButton = (search) => {
+  const handleOnClickFindButton = async (search) => {
     if (!search) return
-    getNotes({ limit, offset: 0, search })
-      .then(({ data, meta }) => {
-        setNotes(data)
-        setTotalNotes(meta.totalCount)
-        setOffset(0)
-      })
+    const { data, meta } = await getNotes({ limit, offset: 0, search })
+    setNotes(data)
+    setTotalNotes(meta.totalCount)
+    setOffset(0)
+    // getNotes({ limit, offset: 0, search })
+    //   .then(({ data, meta }) => {
+    //     setNotes(data)
+    //     setTotalNotes(meta.totalCount)
+    //     setOffset(0)
+    //   })
   }
 
   const handleOnClickSignOutButton = () => {
