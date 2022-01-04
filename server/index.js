@@ -2,6 +2,7 @@ const path = require('path')
 const express = require('express')
 const { sequelize } = require('./sequelize.js')
 const cors = require('cors')
+const { port } = require('./config')
 
 const app = express()
 
@@ -16,5 +17,5 @@ app
   .use('/api/v1', router)
 
 sequelize.sync()
-  .then(() => app.listen(3000, () => console.log('App listen on port 3000')))
+  .then(() => app.listen(port, () => console.log(`App listen on port ${port}`)))
   .catch(console.log)

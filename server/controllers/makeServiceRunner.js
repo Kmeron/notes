@@ -7,6 +7,7 @@ async function successResponseToClient (res, promise) {
   const result = await promise
   console.log(result)
   const data = result?.data ? result : { data: result }
+  console.log(data)
   res.send({ ok: true, ...data })
 }
 
