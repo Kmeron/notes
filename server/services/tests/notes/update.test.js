@@ -4,31 +4,31 @@ const { initUser, closeConnection } = require('./utils')
 
 let token
 
-const notes = [
-  { title: 'blah', text: 'blah blah' },
-  { title: 'title', text: 'text' },
-  { title: 'nigga', text: 'nigga' },
-  { title: 'New Year', text: '2022' },
-  { title: 'Iphone', text: 'X' },
-  { title: 'blah', text: 'blah blah' },
-  { title: 'title', text: 'text' },
-  { title: 'nigga', text: 'nigga' },
-  { title: 'New Year', text: '2022' },
-  { title: 'Iphone', text: 'X' }
-]
+const note = {
+  title: 'blah',
+  text: 'blah blah'
+}
+
+const editedNote = {
+  title: 'edited title',
+  text: 'edited text'
+}
+
+let id
 
 beforeAll(async () => {
   token = await initUser(token)
-  await notes.forEach(note => setupNotes(note))
-  console.log('setupNotes done!')
+  const { data } = await setupNote(note)
+  id = data.id
+  console.log('setupNote done!')
 })
 
 afterAll(() => {
   closeConnection()
 })
 
-async function setupNotes (note) {
-  await fetch(`http://localhost:${port}/api/v1/notes`, {
+async function setupNote (note) {
+  const response = await fetch(`http://localhost:${port}/api/v1/notes`, {
     method: 'POST',
     body: JSON.stringify(note),
     headers: {
@@ -36,11 +36,13 @@ async function setupNotes (note) {
       Authorization: token
     }
   })
+  const result = response.json()
+  return result
 }
 
 async function updateNote (payload) {
   const body = await fetch(`http://localhost:${port}/api/v1/notes`, {
-    method: 'UPDATE',
+    method: 'PUT',
     body: JSON.stringify(payload),
     headers: {
       'Content-Type': 'application/json',
@@ -50,3 +52,15 @@ async function updateNote (payload) {
   const response = body.json()
   return response
 }
+
+test('updating note', async () => {
+  const result = await updateNote({ id, ...editedNote })
+  console.log(result)
+  expect(result).toMatchObject({
+    ok: true,
+    data: {
+      id: id,
+      ...editedNote
+    }
+  })
+})
