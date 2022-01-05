@@ -52,5 +52,5 @@ test('Testing deleting of all notes', async () => {
   const result = await deleteAllNotes()
   console.log(result)
   expect(result.ok).toBeTrue()
-  expect(result.data).toBe({})
+  expect(result.data).toEqual({})
 })

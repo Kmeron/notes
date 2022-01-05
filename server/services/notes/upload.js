@@ -4,6 +4,7 @@ const dumpNote = require('./dump')
 const ServiceError = require('../../ServiceError.js')
 
 async function importFile (notes) {
+  console.log(notes)
   const transaction = await sequelize.transaction()
 
   try {

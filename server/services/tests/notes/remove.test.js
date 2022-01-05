@@ -52,8 +52,9 @@ async function deleteNoteById (params) {
 }
 
 test('delete one note by note id', async () => {
+  console.log(params)
   const result = await deleteNoteById(params)
   console.log(result)
   expect(result.ok).toBeTrue()
-  expect(result.data).toBe({})
+  expect(result.data).toEqual({})
 })
