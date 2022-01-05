@@ -11,7 +11,7 @@ async function authUser ({ email, password }) {
   const transaction = await sequelize.transaction()
 
   try {
-    const [user] = await User.findOne({
+    const user = await User.findOne({
       where: {
         email
       }
