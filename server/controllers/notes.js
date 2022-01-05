@@ -38,7 +38,9 @@ module.exports = {
           title,
           text,
           ...res.locals
+
         }))
+      console.log(payload)
       importFile(payload)
         .then(result => {
           const data = result?.data ? result : { data: result }

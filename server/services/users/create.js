@@ -5,10 +5,8 @@ const Joi = require('joi')
 const { sequelize } = require('../../db.js')
 const { User } = require('../../models/user.js')
 const ServiceError = require('../../ServiceError.js')
-const { jwtSecret } = require('../../config.js')
+const { jwtSecret, saltRounds } = require('../../config.js')
 const { transportSendMail } = require('../../mail.js')
-
-const saltRounds = 10
 
 async function createUser (newUser) {
   const transaction = await sequelize.transaction()
