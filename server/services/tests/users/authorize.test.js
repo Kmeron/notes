@@ -1,8 +1,7 @@
 const bcrypt = require('bcryptjs')
 const { sequelize } = require('../../../sequelize.js')
-const { saltRounds } = require('../../../config')
+const { port, saltRounds } = require('../../../config')
 const fetch = require('node-fetch')
-const { port } = require('../../../config')
 
 const user = {
   email: 'lkmeronl@gmail.com',
