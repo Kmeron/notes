@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+  app:
+    restart: always
+    build: 
+      context: .
+      dockerfile: Dockerfile 
+    environment:
+      - MG_API_KEY=key-1bd9dd5ad51be78b0d725eda5ea92b44
+      - MG_DOMAIN=sandbox66e5fa4b3cb8425f9f038fed1d0ccd22.mailgun.org
+      - DB_USER=root
+      - DB_PASSWORD=qwerty2021
+      - DB_HOST=db
+      - DB_NAME=notesdb
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+  db:
+    image: mysql:latest 
+    env_file:
+      - ./server/.env

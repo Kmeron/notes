@@ -1,8 +1,9 @@
 const Sequelize = require('sequelize')
+const config = require('./config')
 
-const sequelize = new Sequelize('notesdb', 'root', 'qwerty2021', {
+const sequelize = new Sequelize(config.db.name, config.db.user, config.db.password, {
   dialect: 'mysql',
-  host: 'localhost',
+  host: config.db.host,
   define: {
     timestamps: false
   }
