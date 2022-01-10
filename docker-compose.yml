@@ -1,11 +1,17 @@
 version: '3.7'
 
 services:
+  db:
+    restart: always
+    image: mysql:latest 
+    env_file:
+      - ./server/.env
   app:
     restart: always
     build: 
       context: .
       dockerfile: Dockerfile 
+      target: img1
     environment:
       - MG_API_KEY=key-1bd9dd5ad51be78b0d725eda5ea92b44
       - MG_DOMAIN=sandbox66e5fa4b3cb8425f9f038fed1d0ccd22.mailgun.org
@@ -17,7 +23,13 @@ services:
       - 3000:3000
     depends_on:
       - db
-  db:
-    image: mysql:latest 
-    env_file:
-      - ./server/.env
+  client-app:
+    restart: always
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: img2
+    ports: 
+      - 3001:3001
+    depends_on:
+      - app
