@@ -12,6 +12,8 @@ export default function RegistrationPage () {
   const [credentials, setCredentials] = useState({ email: '', password: '' })
 
   const handleOnClickSignOutButton = async (payload) => {
+    if (!payload.email || !payload.password) return
+
     try {
       await registerUser(payload)
       alert('Congratulations! You have just registered. Please check your email to verify account!')
