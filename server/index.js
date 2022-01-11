@@ -6,15 +6,18 @@ const { port } = require('./config')
 
 const app = express()
 
-const pathToStaticFiles = path.resolve('..', 'client', 'public')
+const pathToStaticFiles = path.resolve('..', 'client', 'build')
 
 const router = require('./router')
 
 app
-  .use(express.static(pathToStaticFiles, { extensions: ['html'] }))
   .use(express.json())
   .use(cors({ origin: '*' }))
   .use('/api/v1', router)
+  .use(express.static(pathToStaticFiles))
+  .get('/*', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'client', 'build', 'index.html'))
+  })
 
 sequelize.sync()
   .then(() => app.listen(port, () => console.log(`App listen on port ${port}`)))

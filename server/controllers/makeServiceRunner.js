@@ -124,7 +124,7 @@ function verifyMailSender ({ service, validationRules }, dumpData) {
     try {
       const data = await schema.validateAsync(payload, { abortEarly: false })
       await service(data)
-      res.redirect('http://localhost:3001/authorization')
+      res.redirect('http://localhost:3000/authorization')
     } catch (error) {
       console.log(error)
       if (error.name === 'ValidationError') {
