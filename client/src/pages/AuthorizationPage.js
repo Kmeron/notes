@@ -13,6 +13,8 @@ function AuthorizationPage () {
   const navigate = useNavigate()
 
   const handleOnClickSignInButton = async (payload) => {
+    if (!payload.email || !payload.password) return
+
     try {
       const { data } = await authorizeUser(payload)
       localStorage.setItem('jwt', data.jwt)
