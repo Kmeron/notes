@@ -14,8 +14,9 @@ async function authUser ({ email, password }) {
     const user = await User.findOne({
       where: {
         email
-      }
-    }, { transaction })
+      },
+      transaction
+    })
 
     if (!user) {
       throw new ServiceError({
@@ -46,50 +47,6 @@ async function authUser ({ email, password }) {
     await transaction.rollback()
     throw error
   }
-
-  // return sequelize.transaction().then((transaction) => {
-  //   return User.findAll({
-  //     where: {
-  //       email
-  //     }
-  //   }, { transaction })
-  //     .then(([user]) => {
-  //       if (!user) {
-  //         return transaction.rollback()
-  //           .then(() => {
-  //             throw new ServiceError({
-  //               message: 'User with such login does not exist',
-  //               code: 'INVALID_LOGIN'
-  //             })
-  //           })
-  //       }
-  //       if (user.status === 'PENDING') {
-  //         return transaction.rollback()
-  //           .then(() => {
-  //             throw new ServiceError({
-  //               message: 'Please verify your email',
-  //               code: 'VERIFICATION ERROR'
-  //             })
-  //           })
-  //       }
-  //       return bcrypt.compare(password, user.password)
-  //         .then((result) => {
-  //           if (!result) {
-  //             return transaction.rollback()
-  //               .then(() => {
-  //                 throw new ServiceError({
-  //                   message: 'Invalid Password',
-  //                   code: 'INVALID_PASSWORD'
-  //                 })
-  //               })
-  //           }
-  //           return transaction.commit()
-  //             .then(() => {
-  //               return { jwt: jwt.encode({ userId: user.dataValues.id }, jwtSecret) }
-  //             })
-  //         })
-  //     })
-  // })
 }
 
 const validationRules = {

@@ -9,31 +9,15 @@ async function deleteAllNotes ({ userId }) {
     await Note.destroy({
       where: {
         userId
-      }
-    }, { transaction })
+      },
+      transaction
+    })
     await transaction.commit()
     return {}
   } catch (error) {
     await transaction.rollback()
     throw error
   }
-  // return sequelize.transaction().then((transaction) => {
-  //   return Note.destroy({
-  //     where: {
-  //       userId
-  //     }
-  //   }, { transaction })
-  //     .then(() => {
-  //       return transaction.commit()
-  //         .then(() => {})
-  //     })
-  //     .catch(error => {
-  //       return transaction.rollback()
-  //         .then(() => {
-  //           throw error
-  //         })
-  //     })
-  // })
 }
 
 const validationRules = {

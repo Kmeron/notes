@@ -3,7 +3,6 @@ const { Note } = require('../../models/note.js')
 const ServiceError = require('../../ServiceError')
 const dumpNote = require('./dump')
 const Joi = require('joi')
-// const { Op } = require('sequelize')
 
 async function editNoteById ({ title, text, id, userId }) {
   const transaction = await sequelize.transaction()
@@ -16,15 +15,17 @@ async function editNoteById ({ title, text, id, userId }) {
       where: {
         id,
         userId
-      }
-    }, { transaction })
+      },
+      transaction
+    })
 
     const note = await Note.findOne({
       where: {
         id,
         userId
-      }
-    }, { transaction })
+      },
+      transaction
+    })
 
     await transaction.commit()
 
@@ -38,42 +39,6 @@ async function editNoteById ({ title, text, id, userId }) {
     }
     throw error
   }
-
-  // return sequelize.transaction().then((transaction) => {
-  //   return Note.update({
-  //     title,
-  //     text
-  //   }, {
-  //     where: {
-  //       id,
-  //       userId
-  //     }
-  //   }, { transaction })
-  //     .then(() => {
-  //       return Note.findOne({
-  //         where: {
-  //           id,
-  //           userId
-  //         }
-  //       }, { transaction })
-  //     })
-  //     .then(note => {
-  //       return transaction.commit()
-  //         .then(() => dumpNote(note))
-  //     })
-  //     .catch(error => {
-  //       return transaction.rollback()
-  //         .then(() => {
-  //           if (error.code === 'ER_PARSE_ERROR') {
-  //             throw new ServiceError({
-  //               message: 'Provided invalid data for editing note',
-  //               code: 'INVALID_DATA'
-  //             })
-  //           }
-  //           throw error
-  //         })
-  //     })
-  // })
 }
 
 const validationRules = {
