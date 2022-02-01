@@ -10,16 +10,18 @@ async function verifyUser ({ userId }) {
     const user = await User.findOne({
       where: {
         id: userId
-      }
-    }, { transaction })
+      },
+      transaction
+    })
 
     const [result] = await User.update({
       status: 'ACTIVE'
     }, {
       where: {
         id: user.id
-      }
-    }, { transaction })
+      },
+      transaction
+    })
 
     if (!result) {
       throw new ServiceError({
@@ -33,38 +35,6 @@ async function verifyUser ({ userId }) {
     await transaction.rollback()
     throw error
   }
-  // return sequelize.transaction().then((transaction) => {
-  //   return User.findOne({
-  //     where: {
-  //       id: userId
-  //     }
-  //   }, { transaction })
-  //     .then(user => {
-  //       return User.update({
-  //         status: 'ACTIVE'
-  //       },
-  //       {
-  //         where: {
-  //           id: user.id
-  //         }
-  //       }, { transaction })
-  //     })
-  //     .then(([result]) => {
-  //       if (!result) {
-  //         throw new ServiceError({
-  //           message: 'User has been verified already',
-  //           code: 'VERIFICATION_ERROR'
-  //         })
-  //       }
-  //       return transaction.commit()
-  //     })
-  //     .catch(error => {
-  //       return transaction.rollback()
-  //         .then(() => {
-  //           throw error
-  //         })
-  //     })
-  // })
 }
 
 const validationRules = {

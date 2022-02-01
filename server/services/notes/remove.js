@@ -2,7 +2,6 @@ const { sequelize } = require('../../db.js')
 const { Note } = require('../../models/note.js')
 const ServiceError = require('../../ServiceError')
 const Joi = require('joi')
-// const { Op } = require('sequelize')
 
 async function deleteNoteById ({ id, userId }) {
   const transaction = await sequelize.transaction()
@@ -12,8 +11,9 @@ async function deleteNoteById ({ id, userId }) {
       where: {
         id,
         userId
-      }
-    }, { transaction })
+      },
+      transaction
+    })
 
     if (!result) {
       throw new ServiceError({
@@ -27,27 +27,6 @@ async function deleteNoteById ({ id, userId }) {
     await transaction.rollback()
     throw error
   }
-  // return sequelize.transaction().then((transaction) => {
-  //   return Note.destroy({
-  //     where: {
-  //       id,
-  //       userId
-  //     }
-  //   }, { transaction })
-  //     .then(result => {
-  //       if (!result) {
-  //         return transaction.rollback()
-  //           .then(() => {
-  //             throw new ServiceError({
-  //               message: 'Provided non-existent note id',
-  //               code: 'INVALID_NOTE_ID'
-  //             })
-  //           })
-  //       }
-  //       return transaction.commit()
-  //         .then(() => {})
-  //     })
-  // })
 }
 
 const validationRules = {

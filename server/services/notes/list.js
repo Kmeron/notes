@@ -3,13 +3,12 @@ const { Note } = require('../../models/note.js')
 const ServiceError = require('../../ServiceError')
 const Joi = require('joi')
 const dumpNote = require('./dump')
-// const { Op } = require('sequelize')
 
 async function getNotes (params = {}) {
   const transaction = await sequelize.transaction()
 
   try {
-    const { rows, count } = await Note.findAndCountAll(parseQuery(params), { transaction })
+    const { rows, count } = await Note.findAndCountAll({ ...parseQuery(params), transaction })
     const data = rows.map(element => dumpNote(element.dataValues))
     const meta = { limit: params.limit, offset: params.offset, totalCount: count }
     await transaction.commit()
@@ -24,26 +23,6 @@ async function getNotes (params = {}) {
     }
     throw error
   }
-  // return sequelize.transaction().then((transaction) => {
-  //   return Note.findAndCountAll(parseQuery(params), { transaction })
-  //     .then(({ rows, count }) => {
-  //       const data = rows.map(element => dumpNote(element.dataValues))
-  //       const meta = { limit: params.limit, offset: params.offset, totalCount: count }
-  //       return transaction.commit().then(() => ({ data, meta }))
-  //     })
-  //     .catch(error => {
-  //       return transaction.rollback()
-  //         .then(() => {
-  //           if (['ER_PARSE_ERROR', 'ER_SP_UNDECLARED_VAR'].includes(error.code)) {
-  //             throw new ServiceError({
-  //               message: 'Provided invalid data for getting note',
-  //               code: 'INVALID_DATA'
-  //             })
-  //           }
-  //           throw error
-  //         })
-  //     })
-  // })
 }
 
 function parseQuery (params) {
